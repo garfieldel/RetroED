@@ -56,9 +56,6 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-
     - name: Install Qt for Android
       uses: jurplel/install-qt-action@v4
       with:
