@@ -1,4 +1,4 @@
-name: Build RetroED
+name: Build RetroED chico
 
 on:
   push:
