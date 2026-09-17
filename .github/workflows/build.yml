@@ -83,7 +83,7 @@ jobs:
       working-directory: RetroEDv2
       run: |
         mkdir build && cd build
-        qmake .. -spec android-clang
+        qmake .. -spec android-clang "DEFINES+=S_IREAD=S_IRUSR" "DEFINES+=S_IWRITE=S_IWUSR"
         make -j$(nproc)
         make install INSTALL_ROOT=android-build
         androiddeployqt --input android-libRetroEDv2.so-deployment-settings.json --output android-build --gradle
