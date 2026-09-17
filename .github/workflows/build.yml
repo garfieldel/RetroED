@@ -74,11 +74,6 @@ jobs:
         target: 'android'
         arch: 'android' # O 'android_arm64_v8a' según tu objetivo
         cache: true
-    - name: Download Jom
-      run: |
-        Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile "jom.zip"
-        mkdir build
-        Expand-Archive -Path jom.zip -DestinationPath build
     - name: Run versiongen
       working-directory: RetroEDv2
       run: |
