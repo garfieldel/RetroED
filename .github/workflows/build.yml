@@ -28,6 +28,12 @@ jobs:
         Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile "jom.zip"
         mkdir build
         Expand-Archive -Path jom.zip -DestinationPath build
+    - name: Download & Setup Android NDK r21e
+      run: |
+        curl -O "https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip"
+        unzip -q "android-ndk-r21e-linux-x86_64.zip"
+        echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-ndk-r21e" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$GITHUB_WORKSPACE/android-ndk-r21e" >> $GITHUB_ENV
     - name: Run versiongen
       working-directory: RetroEDv2
       run: |
@@ -55,20 +61,29 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '11'
-
+    - name: Download & Setup Android NDK r21e
+      run: |
+        curl -O "https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip"
+        unzip -q "android-ndk-r21e-linux-x86_64.zip"
+        echo "ANDROID_NDK_ROOT=$GITHUB_WORKSPACE/android-ndk-r21e" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$GITHUB_WORKSPACE/android-ndk-r21e" >> $GITHUB_ENV
     - name: Install Qt for Android
       uses: jurplel/install-qt-action@v4
       with:
         version: '5.15.2'
         target: 'android'
-        arch: 'android_armv7' # O 'android_arm64_v8a' según tu objetivo
+        arch: 'android' # O 'android_arm64_v8a' según tu objetivo
         cache: true
-
+    - name: Download Jom
+      run: |
+        Invoke-WebRequest http://download.qt.io/official_releases/jom/jom.zip -OutFile "jom.zip"
+        mkdir build
+        Expand-Archive -Path jom.zip -DestinationPath build
     - name: Run versiongen
       working-directory: RetroEDv2
       run: |
-        python3 -m pip install pytz
-        python3 versiongen.py $GITHUB_SHA
+        py -m pip install pytz
+        py versiongen.py $Env:GITHUB_SHA
 
     - name: Build APK
       working-directory: RetroEDv2
@@ -83,4 +98,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: RetroED-android
-        path: RetroEDv2/build/android-build/build/outputs/apk/
+        path: .
