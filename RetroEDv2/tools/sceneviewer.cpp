@@ -2876,27 +2876,34 @@ void SceneViewer::drawRect(float x, float y, float w, float h, Vector4<float> co
 void SceneViewer::drawFace(Vector2<int> *vertices, int vertCount, int r, int g, int b, int alpha,
                            InkEffects inkEffect)
 {
-    return; /*
-    uint color = (r << 16) | (g << 8) | (b << 0);
+#if defined(Q_OS_ANDROID)
+    if (!vertices || vertCount < 3)
+        return;
 
-    int count = 3 * vertCount - 3;
-    ushort indecies[0x800 * 6];
+    QPolygon polygon;
     for (int i = 0; i < vertCount; ++i) {
-        if (i < vertCount - 1) {
-            indecies[i * 3 + 0] = i;
-            indecies[i * 3 + 1] = i + 1;
-            indecies[i * 3 + 2] = i + 2;
-        }
+        polygon << QPoint(vertices[i].x, vertices[i].y);
     }
-    indecies[count - 1] = 0;
 
-    addRenderState(inkEffect, vertCount, count, -1, alpha, &primitiveShader, indecies);
+    QColor faceColor(r, g, b, alpha);
+    
+    if (painter && painter->isActive()) {
+        painter->setBrush(QBrush(faceColor));
+        painter->setPen(Qt::NoPen);
+        painter->drawPolygon(polygon);
+    }
 
-    for (int i = 0; i < vertCount; ++i)
-        addPoly(vertices[i].x / (float)(1 << 16), vertices[i].y / (float)(1 << 16), 0, 0, 0,
-    color);
-
-    validDraw = true;//*/
+    Q_UNUSED(inkEffect);
+#else
+    glBegin(GL_POLYGON);
+    glColor4ub(r, g, b, alpha);
+    for (int i = 0; i < vertCount; ++i) {
+        glVertex2i(vertices[i].x, vertices[i].y);
+    }
+    glEnd();
+    
+    Q_UNUSED(inkEffect);
+#endif
 }
 
 void SceneViewer::drawBlendedFace(Vector2<int> *vertices, uint *colors, int vertCount, int alpha,
