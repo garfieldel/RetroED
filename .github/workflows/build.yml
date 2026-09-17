@@ -43,3 +43,47 @@ jobs:
       with:
         name: RetroED-win
         path: build/release/RetroED
+  android-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install Qt for Android
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '5.15.2'
+        target: 'android'
+        arch: 'android_armv7' # O 'android_arm64_v8a' según tu objetivo
+        cache: true
+
+    - name: Run versiongen
+      working-directory: RetroEDv2
+      run: |
+        python3 -m pip install pytz
+        python3 versiongen.py $GITHUB_SHA
+
+    - name: Build APK
+      working-directory: RetroEDv2
+      run: |
+        mkdir build && cd build
+        qmake .. -spec android-clang
+        make -j$(nproc)
+        make install INSTALL_ROOT=android-build
+        androiddeployqt --input android-libRetroEDv2.so-deployment-settings.json --output android-build --gradle
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: RetroED-android
+        path: RetroEDv2/build/android-build/build/outputs/apk/
